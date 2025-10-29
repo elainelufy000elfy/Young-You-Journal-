@@ -1,316 +1,213 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2575.7">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  <meta charset="UTF-8">
+  <title>Mood Journal</title>
+  <style>
+    body {
+      --left-color: #84c7ae;
+      --right-color: #ffffff;
+      background: linear-gradient(to right, var(--left-color), var(--right-color));
+      background-size: 200% 200%;
+      animation: breathe 10s ease-in-out infinite;
+      transition: background 2s ease;
+    }
+
+    /* Calm breathing animation */
+    @keyframes breathe {
+      0%, 100% { background-position: left center; }
+      50% { background-position: right center; }
+    }
+
+    .milestone {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ffde59;
+      padding: 0.75rem 1.5rem;
+      border-radius: 20px;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: fadeInOut 4s ease-in-out;
+      z-index: 999;
+    }
+
+    @keyframes fadeInOut {
+      0%,100% { opacity: 0; }
+      10%,90% { opacity: 1; }
+    }
+
+    @media (max-width: 600px) {
+      .milestone { font-size: 0.9rem; padding: 0.6rem 1rem; }
+    }
   </style>
 </head>
 <body>
-<p class="p1">&lt;script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const emotionInput = document.getElementById('emotion');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const healthInput = document.getElementById('health');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const saveBtn = document.getElementById('saveBtn');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const progressBar = document.getElementById('progressBar');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const message = document.getElementById('message');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const entriesDiv = document.getElementById('entries');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const firework = document.getElementById('firework');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const colorPicker = document.getElementById('colorPicker');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const mainContainer = document.getElementById('mainContainer');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const journal = document.getElementById('journal');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const cycleBtn = document.getElementById('cycleBtn');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const backBtn = document.getElementById('backBtn');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// Mood UI</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const moodRow = document.getElementById('moodRow');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const moodDot = document.getElementById('moodDot');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const moodLabel = document.getElementById('moodLabel');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const moodScore = document.getElementById('moodScore');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const moodStatus = document.getElementById('moodStatus');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// Storage &amp; base color</p>
-<p class="p1"><span class="Apple-converted-space">  </span>let entries = JSON.parse(localStorage.getItem('entries')) || [];</p>
-<p class="p1"><span class="Apple-converted-space">  </span>let baseColor = localStorage.getItem('baseColor') || '#84c7ae';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>colorPicker.value = baseColor;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// Track last color for gradient</p>
-<p class="p1"><span class="Apple-converted-space">  </span>let lastColor = localStorage.getItem('lastColor') || baseColor;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// === Helpers: color conversions ===</p>
-<p class="p1"><span class="Apple-converted-space">  </span>function hexToHSL(hex) {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>let r = 0, g = 0, b = 0;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (hex.length == 4) {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>r = "0x" + hex[1] + hex[1];</p>
-<p class="p1"><span class="Apple-converted-space">      </span>g = "0x" + hex[2] + hex[2];</p>
-<p class="p1"><span class="Apple-converted-space">      </span>b = "0x" + hex[3] + hex[3];</p>
-<p class="p1"><span class="Apple-converted-space">    </span>} else if (hex.length == 7) {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>r = "0x" + hex[1] + hex[2];</p>
-<p class="p1"><span class="Apple-converted-space">      </span>g = "0x" + hex[3] + hex[4];</p>
-<p class="p1"><span class="Apple-converted-space">      </span>b = "0x" + hex[5] + hex[6];</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>r = +r / 255; g = +g / 255; b = +b / 255;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const max = Math.max(r,g,b), min = Math.min(r,g,b);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>let h, s, l = (max + min) / 2;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (max === min) { h = s = 0; }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>else {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const d = max - min;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>s = l &gt; 0.5 ? d / (2 - max - min) : d / (max + min);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>switch (max) {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>case r: h = (g - b) / d + (g &lt; b ? 6 : 0); break;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>case g: h = (b - r) / d + 2; break;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>case b: h = (r - g) / d + 4; break;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p1"><span class="Apple-converted-space">      </span>h /= 6;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>return { h: Math.round(h*360), s: Math.round(s*100), l: Math.round(l*100) };</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>function hslToHex(h, s, l){</p>
-<p class="p1"><span class="Apple-converted-space">    </span>s /= 100; l /= 100;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const c = (1 - Math.abs(2 * l - 1)) * s;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const x = c * (1 - Math.abs((h / 60) % 2 - 1));</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const m = l - c/2;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>let r=0, g=0, b=0;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (0 &lt;= h &amp;&amp; h &lt; 60){ r = c; g = x; b = 0; }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>else if (60 &lt;= h &amp;&amp; h &lt; 120){ r = x; g = c; b = 0; }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>else if (120 &lt;= h &amp;&amp; h &lt; 180){ r = 0; g = c; b = x; }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>else if (180 &lt;= h &amp;&amp; h &lt; 240){ r = 0; g = x; b = c; }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>else if (240 &lt;= h &amp;&amp; h &lt; 300){ r = x; g = 0; b = c; }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>else { r = c; g = 0; b = x; }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const to255 = v =&gt; Math.round((v + m) * 255);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const toHex = v =&gt; v.toString(16).padStart(2, '0');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>return `#${toHex(to255(r))}${toHex(to255(g))}${toHex(to255(b))}`;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// === Breathing Gradient Background ===</p>
-<p class="p1"><span class="Apple-converted-space">  </span>function setBackground(fromColor = lastColor, toColor = '#ffffff', emotionLevel = 0.5, speedFactor = 10) {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const hslFrom = hexToHSL(fromColor);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const hslTo = hexToHSL(toColor);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const saturationFrom = 20 + (emotionLevel * 60);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const lightnessFrom = 40 + (emotionLevel * 30);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const gradient = `linear-gradient(90deg,</p>
-<p class="p1"><span class="Apple-converted-space">      </span>hsl(${hslFrom.h}, ${saturationFrom}%, ${lightnessFrom}%),</p>
-<p class="p1"><span class="Apple-converted-space">      </span>hsl(${hslTo.h}, ${hslTo.s}%, ${hslTo.l}%)</p>
-<p class="p1"><span class="Apple-converted-space">    </span>)`;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>document.body.style.setProperty('--left-color', `hsl(${hslFrom.h}, ${saturationFrom}%, ${lightnessFrom}%)`);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>document.body.style.setProperty('--right-color', `hsl(${hslTo.h}, ${hslTo.s}%, ${hslTo.l}%)`);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>document.body.style.background = gradient;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>document.body.style.transition = 'background 1.5s ease';</p>
-<p class="p2"><span class="Apple-converted-space">    </span></p>
-<p class="p1"><span class="Apple-converted-space">    </span>// Breathing speed based on emotion intensity (higher score = faster)</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const duration = Math.max(4, 12 - (emotionLevel * 8)); // range ~4–12s</p>
-<p class="p1"><span class="Apple-converted-space">    </span>document.body.style.animationDuration = `${duration}s`;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// === Progress/messages ===</p>
-<p class="p1"><span class="Apple-converted-space">  </span>function updateProgress() {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const total = 10;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const percent = Math.min((entries.length / total) * 100, 100);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>progressBar.style.width = percent + '%';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (entries.length === 0) {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>message.textContent = "Start by recording your first feeling 💚";</p>
-<p class="p1"><span class="Apple-converted-space">    </span>} else if (entries.length &lt; total / 2) {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>message.textContent = "Keep going — you’re learning to care for yourself 🌱";</p>
-<p class="p1"><span class="Apple-converted-space">    </span>} else if (entries.length &lt; total) {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>message.textContent = "You’re almost there — growth takes time 🌻";</p>
-<p class="p1"><span class="Apple-converted-space">    </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>message.textContent = "You’ve completed your cycle of growth 🌸";</p>
-<p class="p1"><span class="Apple-converted-space">      </span>firework.style.display = 'flex';</p>
-<p class="p1"><span class="Apple-converted-space">      </span>setTimeout(() =&gt; firework.style.display = 'none', 3000);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// === Render Entries ===</p>
-<p class="p1"><span class="Apple-converted-space">  </span>function renderEntries() {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>entriesDiv.innerHTML = '';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>entries.forEach((e, i) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const div = document.createElement('div');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>div.className = 'entry';</p>
-<p class="p1"><span class="Apple-converted-space">      </span>div.innerHTML = `&lt;strong&gt;Day ${i+1}&lt;/strong&gt;&lt;br&gt;Feeling: ${e.emotion}&lt;br&gt;Health: ${e.health}`;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>entriesDiv.appendChild(div);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>});</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// === Entry Counter &amp; Milestone every 5 ===</p>
-<p class="p1"><span class="Apple-converted-space">  </span>let entryCount = parseInt(localStorage.getItem('entryCount') || '0');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>function showMilestone(count) {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const milestone = document.createElement('div');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>milestone.className = 'milestone';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>milestone.textContent = `🎉 You’ve entered ${count} moods! Keep it up!`;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>document.body.appendChild(milestone);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>setTimeout(() =&gt; milestone.remove(), 4000);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// === Save Button Handler ===</p>
-<p class="p1"><span class="Apple-converted-space">  </span>saveBtn.addEventListener('click', () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const emotion = emotionInput.value.trim();</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const health = healthInput.value;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (!emotion) return alert('Please share how you feel 🌼');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>entries.push({ emotion, health });</p>
-<p class="p1"><span class="Apple-converted-space">    </span>entryCount++;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>localStorage.setItem('entries', JSON.stringify(entries));</p>
-<p class="p1"><span class="Apple-converted-space">    </span>localStorage.setItem('entryCount', entryCount);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>updateProgress();</p>
-<p class="p1"><span class="Apple-converted-space">    </span>emotionInput.value = '';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>healthInput.value = '';</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (entryCount % 5 === 0) showMilestone(entryCount);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// === Navigation ===</p>
-<p class="p1"><span class="Apple-converted-space">  </span>cycleBtn.addEventListener('click', () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>mainContainer.style.display = 'none';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>journal.style.display = 'flex';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>renderEntries();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>});</p>
-<p class="p1"><span class="Apple-converted-space">  </span>backBtn.addEventListener('click', () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>journal.style.display = 'none';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>mainContainer.style.display = 'block';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// === Color Picker ===</p>
-<p class="p1"><span class="Apple-converted-space">  </span>colorPicker.addEventListener('input', (e) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>baseColor = e.target.value;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>localStorage.setItem('baseColor', baseColor);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>setBackground(lastColor, baseColor, 0.5);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// === Transformers.js Loader ===</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const TRANSFORMERS_CDN = 'https://cdn.jsdelivr.net/npm/@xenova/transformers@3.2.2/dist/transformers.min.js';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>function loadScriptOnce(src){</p>
-<p class="p1"><span class="Apple-converted-space">    </span>return new Promise((resolve, reject) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (document.querySelector(`script[data-src="${src}"]`)) return resolve();</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const s = document.createElement('script');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>s.src = src; s.async = true; s.defer = true;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>s.setAttribute('data-src', src);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>s.onload = resolve;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>s.onerror = (e) =&gt; reject(new Error('Failed to load: ' + src));</p>
-<p class="p1"><span class="Apple-converted-space">      </span>document.head.appendChild(s);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>});</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>let emotionPipe = null;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>let loadingPipe = false;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>async function ensurePipe(){</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (emotionPipe || loadingPipe) return;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>loadingPipe = true;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>moodStatus.textContent = 'Loading mood model (first run only)…';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (!globalThis.transformers) {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>try { await loadScriptOnce(TRANSFORMERS_CDN); }</p>
-<p class="p1"><span class="Apple-converted-space">      </span>catch (e) { moodStatus.textContent = 'Could not load Transformers.js.'; console.error(e); loadingPipe = false; return; }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>try {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const pipeFn = globalThis.transformers?.pipeline;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (!pipeFn) throw new Error('Transformers not initialized');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>emotionPipe = await pipeFn('text-classification', 'Xenova/j-hartmann-emotion-english-distilroberta-base', { quantized: true });</p>
-<p class="p1"><span class="Apple-converted-space">      </span>moodStatus.textContent = 'Model ready. Start typing to detect mood.';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>} catch (e) {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>moodStatus.textContent = 'Failed to initialize mood model.';</p>
-<p class="p1"><span class="Apple-converted-space">      </span>console.error(e);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>} finally { loadingPipe = false; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// === Emotion to Color ===</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const EMOTION_COLOR = {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>joy: { h: 55, s: 90, l: 65 },</p>
-<p class="p1"><span class="Apple-converted-space">    </span>love: { h: 340, s: 70, l: 68 },</p>
-<p class="p1"><span class="Apple-converted-space">    </span>surprise: { h: 28, s: 90, l: 60 },</p>
-<p class="p1"><span class="Apple-converted-space">    </span>sadness: { h: 220, s: 60, l: 60 },</p>
-<p class="p1"><span class="Apple-converted-space">    </span>anger: { h: 0, s: 75, l: 58 },</p>
-<p class="p1"><span class="Apple-converted-space">    </span>fear: { h: 275, s: 55, l: 62 },</p>
-<p class="p1"><span class="Apple-converted-space">    </span>disgust: { h: 120, s: 45, l: 55 },</p>
-<p class="p1"><span class="Apple-converted-space">    </span>neutral: { h: 200, s: 10, l: 85 },</p>
-<p class="p1"><span class="Apple-converted-space">  </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>function applyMoodColor(label, score){</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const key = (label || 'neutral').toLowerCase();</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const color = EMOTION_COLOR[key] || EMOTION_COLOR['neutral'];</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const newColor = hslToHex(color.h, color.s, color.l);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>setBackground(lastColor, newColor, score);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>lastColor = newColor;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>localStorage.setItem('lastColor', lastColor);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>baseColor = newColor;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>colorPicker.value = baseColor;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>localStorage.setItem('baseColor', baseColor);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>moodRow.style.display = 'inline-flex';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>moodDot.style.background = `hsl(${color.h} ${color.s}% ${color.l}%)`;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>moodLabel.textContent = label;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>moodScore.textContent = `(${(score*100).toFixed(0)}%)`;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// === Debounced Input Analysis ===</p>
-<p class="p1"><span class="Apple-converted-space">  </span>function debounce(fn, wait=400){ let t; return (...a)=&gt;{clearTimeout(t);t=setTimeout(()=&gt;fn(...a),wait);} }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const analyzeInput = debounce(async () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const text = emotionInput.value.trim();</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (!text){ moodRow.style.display='none'; moodStatus.textContent=''; return; }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>await ensurePipe();</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (!emotionPipe) return;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>try {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>moodStatus.textContent = 'Analyzing mood…';</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const res = await emotionPipe(text, { topk: 1 });</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const top = Array.isArray(res) ? res[0] : res;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>applyMoodColor(top.label, top.score);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>moodStatus.textContent = '';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>} catch (err) {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>moodStatus.textContent = 'Could not analyze mood.';</p>
-<p class="p1"><span class="Apple-converted-space">      </span>console.error(err);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}, 500);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>emotionInput.addEventListener('input', analyzeInput);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// === Initial Paint ===</p>
-<p class="p1"><span class="Apple-converted-space">  </span>setBackground('#ffffff', baseColor, 0.5);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>updateProgress();</p>
-<p class="p1">&lt;/script&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;style&gt;</p>
-<p class="p1">body {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>--left-color: #84c7ae;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>--right-color: #ffffff;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>background: linear-gradient(to right, var(--left-color), var(--right-color));</p>
-<p class="p1"><span class="Apple-converted-space">  </span>background-size: 200% 200%;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>animation: breathe 10s ease-in-out infinite;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>transition: background 2s ease;</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">/* Calm breathing animation */</p>
-<p class="p1">@keyframes breathe {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>0%, 100% { background-position: left center; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>50% { background-position: right center; }</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">.milestone {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>position: fixed;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>bottom: 1rem;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>left: 50%;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>transform: translateX(-50%);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>background: #ffde59;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>padding: 0.75rem 1.5rem;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>border-radius: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>font-weight: bold;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>box-shadow: 0 4px 12px rgba(0,0,0,0.15);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>animation: fadeInOut 4s ease-in-out;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>z-index: 999;</p>
-<p class="p1">}</p>
-<p class="p1">@keyframes fadeInOut {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>0%,100% { opacity: 0; }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>10%,90% { opacity: 1; }</p>
-<p class="p1">}</p>
-<p class="p1">@media (max-width: 600px) {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.milestone { font-size: 0.9rem; padding: 0.6rem 1rem; }</p>
-<p class="p1">}</p>
-<p class="p1">&lt;/style&gt;</p>
+
+<script>
+const emotionInput = document.getElementById('emotion');
+const healthInput = document.getElementById('health');
+const saveBtn = document.getElementById('saveBtn');
+const progressBar = document.getElementById('progressBar');
+const message = document.getElementById('message');
+const entriesDiv = document.getElementById('entries');
+const firework = document.getElementById('firework');
+const colorPicker = document.getElementById('colorPicker');
+const mainContainer = document.getElementById('mainContainer');
+const journal = document.getElementById('journal');
+const cycleBtn = document.getElementById('cycleBtn');
+const backBtn = document.getElementById('backBtn');
+
+// Mood UI
+const moodRow = document.getElementById('moodRow');
+const moodDot = document.getElementById('moodDot');
+const moodLabel = document.getElementById('moodLabel');
+const moodScore = document.getElementById('moodScore');
+const moodStatus = document.getElementById('moodStatus');
+
+// Storage & base color
+let entries = JSON.parse(localStorage.getItem('entries')) || [];
+let baseColor = localStorage.getItem('baseColor') || '#84c7ae';
+colorPicker.value = baseColor;
+
+// Track last color for gradient
+let lastColor = localStorage.getItem('lastColor') || baseColor;
+
+// === Helpers: color conversions ===
+function hexToHSL(hex) {
+  let r=0,g=0,b=0;
+  if(hex.length==4){r="0x"+hex[1]+hex[1]; g="0x"+hex[2]+hex[2]; b="0x"+hex[3]+hex[3];}
+  else if(hex.length==7){r="0x"+hex[1]+hex[2]; g="0x"+hex[3]+hex[4]; b="0x"+hex[5]+hex[6];}
+  r=+r/255; g=+g/255; b=+b/255;
+  const max=Math.max(r,g,b), min=Math.min(r,g,b);
+  let h,s,l=(max+min)/2;
+  if(max===min){h=s=0;} 
+  else {
+    const d=max-min;
+    s=l>0.5?d/(2-max-min):d/(max+min);
+    switch(max){
+      case r: h=(g-b)/d+(g<b?6:0); break;
+      case g: h=(b-r)/d+2; break;
+      case b: h=(r-g)/d+4; break;
+    }
+    h/=6;
+  }
+  return {h:Math.round(h*360), s:Math.round(s*100), l:Math.round(l*100)};
+}
+
+function hslToHex(h,s,l){
+  s/=100;l/=100;
+  const c=(1-Math.abs(2*l-1))*s;
+  const x=c*(1-Math.abs((h/60)%2-1));
+  const m=l-c/2;
+  let r=0,g=0,b=0;
+  if(0<=h&&h<60){r=c; g=x; b=0;}
+  else if(60<=h&&h<120){r=x; g=c; b=0;}
+  else if(120<=h&&h<180){r=0; g=c; b=x;}
+  else if(180<=h&&h<240){r=0; g=x; b=c;}
+  else if(240<=h&&h<300){r=x; g=0; b=c;}
+  else{r=c; g=0; b=x;}
+  const to255=v=>Math.round((v+m)*255);
+  const toHex=v=>v.toString(16).padStart(2,'0');
+  return `#${toHex(to255(r))}${toHex(to255(g))}${toHex(to255(b))}`;
+}
+
+// === Breathing Gradient Background ===
+function setBackground(fromColor=lastColor, toColor='#ffffff', emotionLevel=0.5, speedFactor=10){
+  const hslFrom=hexToHSL(fromColor);
+  const hslTo=hexToHSL(toColor);
+  const saturationFrom=20+(emotionLevel*60);
+  const lightnessFrom=40+(emotionLevel*30);
+  const gradient=`linear-gradient(90deg,
+    hsl(${hslFrom.h}, ${saturationFrom}%, ${lightnessFrom}%),
+    hsl(${hslTo.h}, ${hslTo.s}%, ${hslTo.l}%)
+  )`;
+  document.body.style.setProperty('--left-color', `hsl(${hslFrom.h}, ${saturationFrom}%, ${lightnessFrom}%)`);
+  document.body.style.setProperty('--right-color', `hsl(${hslTo.h}, ${hslTo.s}%, ${hslTo.l}%)`);
+  document.body.style.background = gradient;
+  document.body.style.transition = 'background 1.5s ease';
+
+  const duration = Math.max(4,12-(emotionLevel*8));
+  document.body.style.animationDuration = `${duration}s`;
+}
+
+// === Progress/messages ===
+function updateProgress(){
+  const total=10;
+  const percent=Math.min((entries.length/total)*100,100);
+  progressBar.style.width = percent+'%';
+  if(entries.length===0) message.textContent="Start by recording your first feeling 💚";
+  else if(entries.length<total/2) message.textContent="Keep going — you’re learning to care for yourself 🌱";
+  else if(entries.length<total) message.textContent="You’re almost there — growth takes time 🌻";
+  else{
+    message.textContent="You’ve completed your cycle of growth 🌸";
+    firework.style.display='flex';
+    setTimeout(()=>firework.style.display='none',3000);
+  }
+}
+
+// === Render Entries ===
+function renderEntries(){
+  entriesDiv.innerHTML='';
+  entries.forEach((e,i)=>{
+    const div=document.createElement('div');
+    div.className='entry';
+    div.innerHTML=`<strong>Day ${i+1}</strong><br>Feeling: ${e.emotion}<br>Health: ${e.health}`;
+    entriesDiv.appendChild(div);
+  });
+}
+
+// === Entry Counter & Milestone every 5 ===
+let entryCount=parseInt(localStorage.getItem('entryCount')||'0');
+function showMilestone(count){
+  const milestone=document.createElement('div');
+  milestone.className='milestone';
+  milestone.textContent=`🎉 You’ve entered ${count} moods! Keep it up!`;
+  document.body.appendChild(milestone);
+  setTimeout(()=>milestone.remove(),4000);
+}
+
+// === Save Button Handler ===
+saveBtn.addEventListener('click', ()=>{
+  const emotion=emotionInput.value.trim();
+  const health=healthInput.value;
+  if(!emotion) return alert('Please share how you feel 🌼');
+
+  entries.push({emotion, health});
+  entryCount++;
+  localStorage.setItem('entries', JSON.stringify(entries));
+  localStorage.setItem('entryCount', entryCount);
+
+  updateProgress();
+  emotionInput.value='';
+  healthInput.value='';
+
+  if(entryCount%5===0) showMilestone(entryCount);
+});
+
+// === Navigation ===
+cycleBtn.addEventListener('click', ()=>{
+  mainContainer.style.display='none';
+  journal.style.display='flex';
+  renderEntries();
+});
+backBtn.addEventListener('click', ()=>{
+  journal.style.display='none';
+  mainContainer.style.display='block';
+});
+
+// === Color Picker ===
+colorPicker.addEventListener('input',(e)=>{
+  baseColor=e.target.value;
+  localStorage.setItem('baseColor', baseColor);
+  setBackground(lastColor, baseColor, 0.5);
+});
+
+// Initial paint
+setBackground('#ffffff', baseColor, 0.5);
+updateProgress();
+</script>
+
 </body>
 </html>
