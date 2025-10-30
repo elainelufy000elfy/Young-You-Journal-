@@ -1,13 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Mood Journal</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dear Younger Me </title>
   <style>
     body {
-      --left-color: #84c7ae;
-      --right-color: #ffffff;
-      background: linear-gradient(to right, var(--left-color), var(--right-color));
+      font-family: 'Helvetica Neue', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      color: #333;
+      background: linear-gradient(to right, #84c7ae, #ffffff);
       background-size: 200% 200%;
       animation: breathe 10s ease-in-out infinite;
       transition: background 2s ease;
@@ -15,8 +22,145 @@
 
     /* Calm breathing animation */
     @keyframes breathe {
-      0%, 100% { background-position: left center; }
+      0%,100% { background-position: left center; }
       50% { background-position: right center; }
+    }
+
+    h1 {
+      margin-top: 40px;
+      font-size: 1.8em;
+      color: #2e4a45;
+      text-align: center;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 400px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-top: 10px;
+      color: #2e4a45;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      margin-top: 6px;
+      font-size: 1em;
+    }
+
+    button {
+      background: #84c7ae;
+      color: white;
+      font-weight: 600;
+      border: none;
+      margin-top: 20px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #6cb89d;
+    }
+
+    .progress-container {
+      margin-top: 20px;
+      background: #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+      height: 20px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: #84c7ae;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    .message {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 1em;
+      color: #2e4a45;
+      min-height: 30px;
+    }
+
+    .entries {
+      margin-top: 25px;
+      text-align: left;
+    }
+
+    .entry {
+      background: #f4f9f8;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 0.9em;
+    }
+
+    #firework {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.2);
+      z-index: 10;
+    }
+
+    #firework img {
+      width: 150px;
+      opacity: 0.9;
+    }
+
+    #colorPicker {
+      margin-top: 10px;
+      width: 100%;
+      height: 40px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+    }
+
+    #cycleBtn {
+      background: #5a9e88;
+      margin-top: 10px;
+    }
+
+    #journal {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      width: 90%;
+      max-width: 400px;
+      margin-top: 20px;
+    }
+
+    #journal h2 {
+      margin-bottom: 10px;
+    }
+
+    #backBtn {
+      margin-top: 15px;
+      background: #bbb;
     }
 
     .milestone {
@@ -45,169 +189,184 @@
 </head>
 <body>
 
-<script>
-const emotionInput = document.getElementById('emotion');
-const healthInput = document.getElementById('health');
-const saveBtn = document.getElementById('saveBtn');
-const progressBar = document.getElementById('progressBar');
-const message = document.getElementById('message');
-const entriesDiv = document.getElementById('entries');
-const firework = document.getElementById('firework');
-const colorPicker = document.getElementById('colorPicker');
-const mainContainer = document.getElementById('mainContainer');
-const journal = document.getElementById('journal');
-const cycleBtn = document.getElementById('cycleBtn');
-const backBtn = document.getElementById('backBtn');
+  <h1>Dear Younger Me </h1>
 
-// Mood UI
-const moodRow = document.getElementById('moodRow');
-const moodDot = document.getElementById('moodDot');
-const moodLabel = document.getElementById('moodLabel');
-const moodScore = document.getElementById('moodScore');
-const moodStatus = document.getElementById('moodStatus');
+  <div class="container" id="mainContainer">
+    <label for="colorPicker">Choose your base color 💖</label>
+    <input type="color" id="colorPicker" value="#84c7ae">
 
-// Storage & base color
-let entries = JSON.parse(localStorage.getItem('entries')) || [];
-let baseColor = localStorage.getItem('baseColor') || '#84c7ae';
-colorPicker.value = baseColor;
+    <label for="emotion">How are you feeling today?</label>
+    <input type="text" id="emotion" placeholder="Type your feelings..." />
 
-// Track last color for gradient
-let lastColor = localStorage.getItem('lastColor') || baseColor;
+    <label for="health">How’s your health?</label>
+    <select id="health">
+      <option value="good">Good 😊</option>
+      <option value="okay">Okay 😌</option>
+      <option value="tired">Tired 😴</option>
+      <option value="stressed">Stressed 😣</option>
+      <option value="unwell">Unwell 🤒</option>
+    </select>
 
-// === Helpers: color conversions ===
-function hexToHSL(hex) {
-  let r=0,g=0,b=0;
-  if(hex.length==4){r="0x"+hex[1]+hex[1]; g="0x"+hex[2]+hex[2]; b="0x"+hex[3]+hex[3];}
-  else if(hex.length==7){r="0x"+hex[1]+hex[2]; g="0x"+hex[3]+hex[4]; b="0x"+hex[5]+hex[6];}
-  r=+r/255; g=+g/255; b=+b/255;
-  const max=Math.max(r,g,b), min=Math.min(r,g,b);
-  let h,s,l=(max+min)/2;
-  if(max===min){h=s=0;} 
-  else {
-    const d=max-min;
-    s=l>0.5?d/(2-max-min):d/(max+min);
-    switch(max){
-      case r: h=(g-b)/d+(g<b?6:0); break;
-      case g: h=(b-r)/d+2; break;
-      case b: h=(r-g)/d+4; break;
+    <button id="saveBtn">Save Entry</button>
+    <button id="cycleBtn">Cycle of Growth 🌸</button>
+
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="message" id="message"></div>
+  </div>
+
+  <div id="journal">
+    <h2>🌼 Cycle of Growth</h2>
+    <div id="entries" class="entries"></div>
+    <button id="backBtn">Back</button>
+  </div>
+
+  <div id="firework">
+    <img src="https://i.gifer.com/7efs.gif" alt="celebration">
+  </div>
+
+  <script>
+    const emotionInput = document.getElementById('emotion');
+    const healthInput = document.getElementById('health');
+    const saveBtn = document.getElementById('saveBtn');
+    const progressBar = document.getElementById('progressBar');
+    const message = document.getElementById('message');
+    const entriesDiv = document.getElementById('entries');
+    const firework = document.getElementById('firework');
+    const colorPicker = document.getElementById('colorPicker');
+    const mainContainer = document.getElementById('mainContainer');
+    const journal = document.getElementById('journal');
+    const cycleBtn = document.getElementById('cycleBtn');
+    const backBtn = document.getElementById('backBtn');
+
+    let entries = JSON.parse(localStorage.getItem('entries')) || [];
+    let baseColor = localStorage.getItem('baseColor') || '#84c7ae';
+    colorPicker.value = baseColor;
+    let lastColor = localStorage.getItem('lastColor') || '#ffffff';
+
+    function hexToHSL(hex) {
+      let r=0,g=0,b=0;
+      if(hex.length==4){r="0x"+hex[1]+hex[1]; g="0x"+hex[2]+hex[2]; b="0x"+hex[3]+hex[3];}
+      else if(hex.length==7){r="0x"+hex[1]+hex[2]; g="0x"+hex[3]+hex[4]; b="0x"+hex[5]+hex[6];}
+      r=+r/255; g=+g/255; b=+b/255;
+      const max=Math.max(r,g,b), min=Math.min(r,g,b);
+      let h,s,l=(max+min)/2;
+      if(max===min){h=s=0;} 
+      else {
+        const d=max-min;
+        s=l>0.5?d/(2-max-min):d/(max+min);
+        switch(max){
+          case r: h=(g-b)/d+(g<b?6:0); break;
+          case g: h=(b-r)/d+2; break;
+          case b: h=(r-g)/d+4; break;
+        }
+        h/=6;
+      }
+      return {h:Math.round(h*360), s:Math.round(s*100), l:Math.round(l*100)};
     }
-    h/=6;
-  }
-  return {h:Math.round(h*360), s:Math.round(s*100), l:Math.round(l*100)};
-}
 
-function hslToHex(h,s,l){
-  s/=100;l/=100;
-  const c=(1-Math.abs(2*l-1))*s;
-  const x=c*(1-Math.abs((h/60)%2-1));
-  const m=l-c/2;
-  let r=0,g=0,b=0;
-  if(0<=h&&h<60){r=c; g=x; b=0;}
-  else if(60<=h&&h<120){r=x; g=c; b=0;}
-  else if(120<=h&&h<180){r=0; g=c; b=x;}
-  else if(180<=h&&h<240){r=0; g=x; b=c;}
-  else if(240<=h&&h<300){r=x; g=0; b=c;}
-  else{r=c; g=0; b=x;}
-  const to255=v=>Math.round((v+m)*255);
-  const toHex=v=>v.toString(16).padStart(2,'0');
-  return `#${toHex(to255(r))}${toHex(to255(g))}${toHex(to255(b))}`;
-}
+    function setBackground(fromColor=lastColor, toColor=baseColor, emotionLevel=0.5) {
+      const hslFrom=hexToHSL(fromColor);
+      const hslTo=hexToHSL(toColor);
+      document.body.style.background = 
+        `linear-gradient(90deg,
+         hsl(${hslFrom.h}, ${hslFrom.s}%, ${hslFrom.l}%),
+         hsl(${hslTo.h}, ${hslTo.s}%, ${hslTo.l}%))`;
+      const duration = Math.max(4,12-(emotionLevel*8));
+      document.body.style.animationDuration = `${duration}s`;
+    }
 
-// === Breathing Gradient Background ===
-function setBackground(fromColor=lastColor, toColor='#ffffff', emotionLevel=0.5, speedFactor=10){
-  const hslFrom=hexToHSL(fromColor);
-  const hslTo=hexToHSL(toColor);
-  const saturationFrom=20+(emotionLevel*60);
-  const lightnessFrom=40+(emotionLevel*30);
-  const gradient=`linear-gradient(90deg,
-    hsl(${hslFrom.h}, ${saturationFrom}%, ${lightnessFrom}%),
-    hsl(${hslTo.h}, ${hslTo.s}%, ${hslTo.l}%)
-  )`;
-  document.body.style.setProperty('--left-color', `hsl(${hslFrom.h}, ${saturationFrom}%, ${lightnessFrom}%)`);
-  document.body.style.setProperty('--right-color', `hsl(${hslTo.h}, ${hslTo.s}%, ${hslTo.l}%)`);
-  document.body.style.background = gradient;
-  document.body.style.transition = 'background 1.5s ease';
+    function updateProgress() {
+      const total = 10;
+      const percent = Math.min((entries.length / total) * 100, 100);
+      progressBar.style.width = percent + '%';
+      if (entries.length === 0) {
+        message.textContent = "Start by recording your first feeling… What does your soul want to say? What urge do you feel?";
+      } else if (entries.length < total / 2) {
+        message.textContent = "Keep going — you’re learning to care for yourself ";
+      } else if (entries.length < total) {
+        message.textContent = "You’re doing so well! Stay consistent with your soul";
+      } else {
+        message.textContent = "You’ve reached a milestone! Celebrateee 🌼";
+        firework.style.display = "flex";
+        setTimeout(() => firework.style.display = "none", 3000);
+      }
+    }
 
-  const duration = Math.max(4,12-(emotionLevel*8));
-  document.body.style.animationDuration = `${duration}s`;
-}
+    function renderEntries() {
+      entriesDiv.innerHTML = entries.map((e, i) => `
+        <div class="entry">
+          <b>Day ${i+1}</b><br>
+          Emotion: ${e.emotion}<br>
+          Health: ${e.health}<br>
+          <small>${e.date}</small>
+        </div>
+      `).join('');
+    }
 
-// === Progress/messages ===
-function updateProgress(){
-  const total=10;
-  const percent=Math.min((entries.length/total)*100,100);
-  progressBar.style.width = percent+'%';
-  if(entries.length===0) message.textContent="Start by recording your first feeling 💚";
-  else if(entries.length<total/2) message.textContent="Keep going — you’re learning to care for yourself 🌱";
-  else if(entries.length<total) message.textContent="You’re almost there — growth takes time 🌻";
-  else{
-    message.textContent="You’ve completed your cycle of growth 🌸";
-    firework.style.display='flex';
-    setTimeout(()=>firework.style.display='none',3000);
-  }
-}
+    let entryCount = parseInt(localStorage.getItem('entryCount') || '0');
+    function showMilestone(count) {
+      const milestone = document.createElement('div');
+      milestone.className = 'milestone';
+      milestone.textContent = `🎉 You’ve entered ${count} moods! Keep it up!`;
+      document.body.appendChild(milestone);
+      setTimeout(() => milestone.remove(), 4000);
+    }
 
-// === Render Entries ===
-function renderEntries(){
-  entriesDiv.innerHTML='';
-  entries.forEach((e,i)=>{
-    const div=document.createElement('div');
-    div.className='entry';
-    div.innerHTML=`<strong>Day ${i+1}</strong><br>Feeling: ${e.emotion}<br>Health: ${e.health}`;
-    entriesDiv.appendChild(div);
-  });
-}
+    saveBtn.addEventListener('click', () => {
+      const emotion = emotionInput.value.trim();
+      const health = healthInput.value;
+      if (!emotion) return alert("Please describe how you feel 💭");
 
-// === Entry Counter & Milestone every 5 ===
-let entryCount=parseInt(localStorage.getItem('entryCount')||'0');
-function showMilestone(count){
-  const milestone=document.createElement('div');
-  milestone.className='milestone';
-  milestone.textContent=`🎉 You’ve entered ${count} moods! Keep it up!`;
-  document.body.appendChild(milestone);
-  setTimeout(()=>milestone.remove(),4000);
-}
+      let level = 0.5;
+      const moodWords = emotion.toLowerCase();
+      if (moodWords.includes("happy") || moodWords.includes("great") || moodWords.includes("good")) level = 1;
+      else if (moodWords.includes("sad") || moodWords.includes("tired") || moodWords.includes("stressed")) level = 0.2;
 
-// === Save Button Handler ===
-saveBtn.addEventListener('click', ()=>{
-  const emotion=emotionInput.value.trim();
-  const health=healthInput.value;
-  if(!emotion) return alert('Please share how you feel 🌼');
+      lastColor = baseColor;
+      localStorage.setItem('lastColor', lastColor);
 
-  entries.push({emotion, health});
-  entryCount++;
-  localStorage.setItem('entries', JSON.stringify(entries));
-  localStorage.setItem('entryCount', entryCount);
+      const newEntry = {
+        emotion,
+        health,
+        date: new Date().toLocaleString(),
+        level
+      };
 
-  updateProgress();
-  emotionInput.value='';
-  healthInput.value='';
+      entries.push(newEntry);
+      entryCount++;
+      localStorage.setItem('entries', JSON.stringify(entries));
+      localStorage.setItem('entryCount', entryCount);
 
-  if(entryCount%5===0) showMilestone(entryCount);
-});
+      setBackground(lastColor, baseColor, level);
+      emotionInput.value = '';
+      updateProgress();
+      renderEntries();
 
-// === Navigation ===
-cycleBtn.addEventListener('click', ()=>{
-  mainContainer.style.display='none';
-  journal.style.display='flex';
-  renderEntries();
-});
-backBtn.addEventListener('click', ()=>{
-  journal.style.display='none';
-  mainContainer.style.display='block';
-});
+      if (entryCount % 5 === 0) showMilestone(entryCount);
+    });
 
-// === Color Picker ===
-colorPicker.addEventListener('input',(e)=>{
-  baseColor=e.target.value;
-  localStorage.setItem('baseColor', baseColor);
-  setBackground(lastColor, baseColor, 0.5);
-});
+    colorPicker.addEventListener('input', (e) => {
+      baseColor = e.target.value;
+      localStorage.setItem('baseColor', baseColor);
+      setBackground(lastColor, baseColor, 0.5);
+    });
 
-// Initial paint
-setBackground('#ffffff', baseColor, 0.5);
-updateProgress();
-</script>
+    cycleBtn.addEventListener('click', () => {
+      mainContainer.style.display = 'none';
+      journal.style.display = 'flex';
+      renderEntries();
+    });
 
+    backBtn.addEventListener('click', () => {
+      journal.style.display = 'none';
+      mainContainer.style.display = 'block';
+    });
+
+    // initialize
+    setBackground(lastColor, baseColor, 0.5);
+    updateProgress();
+  </script>
 </body>
 </html>
